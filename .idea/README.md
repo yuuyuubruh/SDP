@@ -1,124 +1,68 @@
-```markdown
-# Outfit Builder (Assignment #1 — Builder Pattern)
+Markdown
+# Outfit Factory (Assignment 2 - Abstract Factory & Factory Method)
 
 ## Project Overview
-This project implements the Builder design pattern in Java to construct clothing outfits. 
-An outfit includes a top, bottom, shoes, and an optional accessory. The Builder pattern makes it easy to assemble an outfit step-by-step, validate mandatory items, and use a Director for ready-made presets.
+This project implements the **Abstract Factory** and **Factory Method** design patterns in Java to generate coordinated clothing outfits (tops and bottoms) for different style families (Casual and Formal).
 
 ---
 
 ## Clean Code Principles Applied
 
-### 1. Meaningful Names
-Names of variables and methods are clear and intention-revealing without extra comments.
+### 1. Meaningful & Intention-Revealing Names
+Class and method names explicitly convey their functional role in the domain.
 
 * **Before (Bad):**
 ```java
-public OutfitBuilder setT(String t) {
-    this.t = t;
-    return this;
+public interface Factory {
+    Object get1();
 }
+After (OutfitFactory.java):
 
-```
-
-* **After (`OutfitBuilder.java`):**
-
-```java
-public OutfitBuilder setTop(String top) {
-    this.top = top;
-    return this;
+Java
+public interface OutfitFactory {
+    Top createTop();
+    Bottom createBottom();
 }
+2. Dependency Inversion Principle (DIP)
+The client code works through abstract interfaces (OutfitFactory, Top, Bottom) rather than tight coupling to concrete classes.
 
-```
+Before (Bad):
 
----
+Java
+CasualTop top = new CasualTop(); // Tightly coupled
+After (Main.java):
 
-### 2. Single Responsibility Principle (SRP)
+Java
+OutfitFactory factory = new CasualOutfitFactory();
+Top top = factory.createTop();
+3. Single Responsibility Principle (SRP)
+Each factory class is exclusively responsible for instantiating its designated product family.
 
-Each class focuses on a single task:
+Example (CasualOutfitFactory.java):
 
-* `Outfit`: Product class that only stores outfit data.
-* `OutfitBuilder`: Handles step-by-step construction and validation.
-* `OutfitDirector`: Manages predefined templates (casual, sport, formal).
-
-* **Example (`OutfitDirector.java`):**
-
-```java
-public Outfit createCasualOutfit() {
-    return new OutfitBuilder()
-            .setTop("White T-Shirt")
-            .setBottom("Blue Jeans")
-            .setShoes("White Sneakers")
-            .setAccessory("Black Bag")
-            .build();
-}
-
-```
-
----
-
-### 3. Validated Construction
-
-The `build()` method checks that essential items (top, bottom, shoes) are provided before creating the object, preventing broken or incomplete states.
-
-* **Before (Bad):**
-
-```java
-public Outfit build() {
-    return new Outfit(top, bottom, shoes, accessory); // allows incomplete object
-}
-
-```
-
-* **After (`OutfitBuilder.java`):**
-
-```java
-public Outfit build() {
-    if (top == null || bottom == null || shoes == null) {
-        throw new IllegalStateException("Outfit must have top, bottom and shoes");
+Java
+public class CasualOutfitFactory implements OutfitFactory {
+    @Override
+    public Top createTop() {
+        return new CasualTop();
     }
-    return new Outfit(top, bottom, shoes, accessory);
-}
 
-```
-
----
-
-### 4. Fluent API / Method Chaining
-
-Setter methods in the builder return `this`, making the construction syntax clean and easy to read.
-
-* **Example (`Main.java`):**
-
-```java
-Outfit custom = new OutfitBuilder()
-        .setTop("Black Hoodie")
-        .setBottom("Grey Cargo Pants")
-        .setShoes("Black Sneakers")
-        .setAccessory("Silver Necklace")
-        .build();
-
-```
-
----
-
-### 5. Encapsulation & Immutability
-
-All fields in `Outfit` are `private`, and there are no setters after creation. Once built, the outfit cannot be modified unexpectedly.
-
-* **Example (`Outfit.java`):**
-
-```java
-public class Outfit {
-    private String top;
-    private String bottom;
-    private String shoes;
-    private String accessory;
-
-    public Outfit(String top, String bottom, String shoes, String accessory) {
-        this.top = top;
-        this.bottom = bottom;
-        this.shoes = shoes;
-        this.accessory = accessory;
+    @Override
+    public Bottom createBottom() {
+        return new CasualBottom();
     }
 }
+4. Small, Focused Classes
+Every product class focuses on a single implementation detail of a specific clothing item.
+
+Example (CasualTop.java):
+
+Java
+public class CasualTop implements Top {
+    @Override
+    public void wearTop() {
+        System.out.println("Top: White T-Shirt");
+    }
+}
+5. Open/Closed Principle (OCP)
+New outfit families (e.g., SportOutfitFactory) can be introduced without modifying existing factory interfaces or client logic.
